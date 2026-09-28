@@ -1,0 +1,27 @@
+when we work with the tensor or with models then we have to specify divice all the time whether it is gpu or cpu for that reason we have divice agnostic which will help to get short cut in it
+
+divice = torch.divice(
+"cuda" if torch.cuda.is_available else 'cpu'    
+
+
+)
+
+when we got run this now we can use 
+
+model = MyModel().to(device)
+
+images = images.to(device)
+labels = labels.to(device)
+
+
+-----------------------------------------
+
+
+
+model.to(device)
+images = images.to(device)
+labels = labels.to(device)    ---> divice agnostic 
+
+
+
+-------------------------------------------

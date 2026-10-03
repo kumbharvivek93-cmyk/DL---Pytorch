@@ -1,0 +1,12 @@
+epoch=1
+for epoch in range(epoch):
+	model.train()
+	y_pred=model(X_train)
+	loss=model.foss_fun(y_pred,y_train)
+	optimizer.zero_grad()
+	loss.backward()
+	optimizer.step()
+	model.eval()
+	
+
+~ this is training loop

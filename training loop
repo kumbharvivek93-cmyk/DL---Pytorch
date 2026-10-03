@@ -10,3 +10,18 @@ for epoch in range(epoch):
 	
 
 ~ this is training loop
+
+
+# building a training loop
+epoch=100
+for epoch in range(epoch):
+    modelv.train()
+    y_pred=modelv(x_train)
+    loss=loss_function(y_pred,y_train)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    modelv.eval()
+
+    if epoch % 10 ==0:
+        print(f'epoch {epoch} and loss :: {loss.item()} and weight is {weight.item()} and bias is {bias.item()}')

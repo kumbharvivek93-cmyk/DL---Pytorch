@@ -1,0 +1,287 @@
+Absolutely bro. 🔥 This is where your PyTorch knowledge starts becoming **real application development**.
+
+Since you saved the model as a `state_dict`, integrating it into Flask is straightforward.
+
+The key idea is:
+
+```text
+Browser
+   ↓
+Flask
+   ↓
+Load model architecture
+   ↓
+Load firstLinearRegModel.pth
+   ↓
+User input
+   ↓
+Tensor
+   ↓
+PyTorch model
+   ↓
+Prediction
+   ↓
+HTML response
+```
+
+### 1. Your project structure
+
+I'd organize it like:
+
+```text
+pytorch_flask/
+│
+├── app.py
+│
+├── models/
+│   └── firstLinearRegModel.pth
+│
+└── templates/
+    └── index.html
+```
+
+### 2. Recreate the same model architecture
+
+This is **very important**.
+
+If you trained:
+
+```python
+class LinerRegModel11(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.weight = nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+        self.bias = nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+    def forward(self, x):
+        return self.weight * x + self.bias
+```
+
+then Flask must have the same architecture:
+
+```python
+class LinerRegModel11(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.weight = nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+        self.bias = nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+    def forward(self, x):
+        return self.weight * x + self.bias
+```
+
+Then load your trained parameters:
+
+```python
+model = LinerRegModel11()
+
+model.load_state_dict(
+    torch.load(
+        "models/firstLinearRegModel.pth",
+        weights_only=True
+    )
+)
+
+model.eval()
+```
+
+### 3. Flask route
+
+For example:
+
+```python
+from flask import Flask, render_template, request
+import torch
+
+app = Flask(__name__)
+
+
+class LinerRegModel11(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.weight = torch.nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+        self.bias = torch.nn.Parameter(
+            torch.randn(1, requires_grad=True, dtype=torch.float)
+        )
+
+    def forward(self, x):
+        return self.weight * x + self.bias
+
+
+model = LinerRegModel11()
+
+model.load_state_dict(
+    torch.load(
+        "models/firstLinearRegModel.pth",
+        weights_only=True
+    )
+)
+
+model.eval()
+
+
+@app.route("/", methods=["GET", "POST"])
+def home():
+
+    prediction = None
+
+    if request.method == "POST":
+
+        value = float(request.form["value"])
+
+        x = torch.tensor([value], dtype=torch.float32)
+
+        with torch.inference_mode():
+            prediction = model(x).item()
+
+    return render_template(
+        "index.html",
+        prediction=prediction
+    )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+### 4. HTML
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PyTorch Linear Regression</title>
+</head>
+
+<body>
+
+    <h1>PyTorch Linear Regression</h1>
+
+    <form method="POST">
+
+        <input
+            type="number"
+            step="any"
+            name="value"
+            placeholder="Enter X"
+            required
+        >
+
+        <button type="submit">
+            Predict
+        </button>
+
+    </form>
+
+    {% if prediction is not none %}
+        <h2>Prediction: {{ prediction }}</h2>
+    {% endif %}
+
+</body>
+</html>
+```
+
+### 🧠 Notice what happens
+
+Suppose the user enters:
+
+```text
+5
+```
+
+Flask receives it as a **string**:
+
+```python
+value = request.form["value"]
+```
+
+Convert it:
+
+```python
+value = float(value)
+```
+
+Then convert it to a PyTorch tensor:
+
+```python
+x = torch.tensor([value], dtype=torch.float32)
+```
+
+Then:
+
+```python
+with torch.inference_mode():
+    prediction = model(x)
+```
+
+And finally:
+
+```python
+prediction = prediction.item()
+```
+
+converts the one-element tensor into a normal Python number that Flask/Jinja can display.
+
+---
+
+## 🔥 The most important production concept
+
+**Do NOT load the model inside the route.**
+
+Don't do this:
+
+```python
+@app.route("/")
+def home():
+
+    model = LinerRegModel11()
+
+    model.load_state_dict(...)
+
+    ...
+```
+
+That would potentially reload the model every time someone requests the page.
+
+Instead:
+
+```python
+model = LinerRegModel11()
+model.load_state_dict(...)
+model.eval()
+```
+
+Load it **once when the Flask application starts**.
+
+Then every request uses the already-loaded model:
+
+```text
+Flask starts
+    ↓
+Load model ONCE
+    ↓
+Request 1 → prediction
+Request 2 → prediction
+Request 3 → prediction
+Request 4 → prediction
+```
+
+That's the basic pattern you'll eventually use for your **Student Risk Predictor, AgriLink ML models, and other ML-powered Flask applications**.
+
+And one more thing: if your training data was **scaled/normalized**, Flask must apply the **exact same preprocessing** before sending the input to PyTorch. That's one of the biggest things to get right when moving an ML model into a web app.

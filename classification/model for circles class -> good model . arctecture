@@ -1,0 +1,66 @@
+import pandas as pd
+import torch
+import torch.nn as nn
+from sklearn.datasets import make_circles
+from sklearn.model_selection import train_test_split
+
+# 1. Generate Dataset
+X, y = make_circles(n_samples=1000, noise=0.03, random_state=42)
+
+# Convert to PyTorch Tensors (Float32 is standard for PyTorch weights)
+X = torch.from_numpy(X).type(torch.float32)
+y = torch.from_numpy(y).type(torch.float32)
+
+# Split into Train and Test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+# 2. Build the Neural Network with Non-Linearity
+class CircleModel(nn.Module):
+
+  def __init__(self):
+    super().__init__()
+    self.layer_stack = nn.Sequential(
+        nn.Linear(in_features=2, out_features=10),
+        nn.ReLU(),  # <-- NON-LINEAR ACTIVATION IS ESSENTIAL HERE
+        nn.Linear(in_features=10, out_features=10),
+        nn.ReLU(),  # <-- NON-LINEAR ACTIVATION
+        nn.Linear(in_features=10, out_features=1),
+    )
+
+  def forward(self, x):
+    return self.layer_stack(x)
+
+
+model = CircleModel()
+
+# 3. Define Loss Function and Optimizer
+loss_fn = (
+    nn.BCEWithLogitsLoss()
+)  # Combines a Sigmoid layer and Binary Cross-Entropy Loss
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+
+# 4. Training Loop
+epochs = 3000
+
+for epoch in range(epochs):
+  model.train()
+
+  # Forward pass
+  y_logits = model(X_train).squeeze()
+  y_pred = torch.round(torch.sigmoid(y_logits))  # Convert logits to probabilities -> binary labels
+
+  # Calculate loss and accuracy
+  loss = loss_fn(y_logits, y_train)
+  acc = (y_pred == y_train).sum().item() / len(y_train)
+
+  # Optimizer zero grad & Backpropagation
+  optimizer.zero_grad()
+  loss.backward()
+  optimizer.step()
+
+  if epoch % 100 == 0:
+    print(f"Epoch: {epoch} | Loss: {loss:.4f} | Accuracy: {acc*100:.2f}%")

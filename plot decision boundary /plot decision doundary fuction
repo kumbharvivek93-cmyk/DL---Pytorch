@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def plot_decision_boundary(
     model,
-    X,
+    X,  # if data is scaled then here just x_scaled and if y scaled then scaled , generally it is used for calssification
     y,
     scaler=None,
     threshold=0.5,

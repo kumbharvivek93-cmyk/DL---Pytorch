@@ -1,0 +1,29 @@
+def traningloop(model:torch.nn.Module,
+               loss_fuction=torch.nn.Module,
+                optimizer=torch.nn.Module,
+                dataloader=torch.utils.data.DataLoader,
+               device:torch.device =device):
+    model.train()
+    train_loss=0
+    for batch ,(X,y) in enumerate(dataloader):
+        X,y=X.to(device),y.to(device)
+        y_pred=model(X)
+        loss=loss_funtion(y_pred,y)
+        
+        optimizer.zero_grad()
+        
+        loss.backward()
+        train_loss +=loss
+        optimizer.step()
+    train_loss /= len(dataloader)
+
+    if epoch % 1 ==0:
+        print(f' epoch -> {epoch} , train loss -> {train_loss.item()}')
+        
+    
+
+
+
+
+
+      

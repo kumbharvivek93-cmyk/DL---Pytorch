@@ -1,0 +1,103 @@
+def testing_loop(model:torch.nn.Module,
+                optimizer:torch.nn.Module,
+                loss_function=torch.nn.Module,
+                device:torch.device=device,
+                dataloader=torch.utils.data.DataLoader):
+    model.eval()
+    test_loss=0
+    with torch.inference_mode():
+        for X,y in dataloader:
+            X,y=X.to(device),y.to(device)
+            y_pred=model(X)
+            loss=loss_function(y_pred,y)
+            test_loss +=loss
+        test_loss /=len(dataloader)
+    if epoch % 1 == 0:
+        print(f'test loss -> {test_loss.item()}')
+
+
+
+def train_loop(model:torch.nn.Module,
+              loss_function:torch.nn.Module,
+              optimizer:torch.nn.Module,
+               device:torch.device=device,
+               dataloader=train_dataloader
+              ):
+    model.train()
+    train_loss=0
+    for batch,(X,y) in enumerate(dataloader):
+        X,y=X.to(device),y.to(device)
+        y_pred=model(X)
+        loss=loss_function(y_pred,y)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        train_loss +=loss
+    train_loss /=len(dataloader)
+
+    if epoch % 1 ==0:
+        print(f' epoch -> {epoch} , train loss -> {train_loss.item()}')
+
+
+
+
+      class spideynet(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.convblock=nn.Sequential(
+            nn.Conv2d(in_channels=1,   # one image comes with one color tone and 32 filters/ kernals are applied 
+                     out_channels=32,
+                     kernel_size=3,
+                      padding=1),
+
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
+
+            # second conv layer
+
+            nn.Conv2d(in_channels=32,
+                     out_channels=64,
+                     kernel_size=3,
+                     padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2)
+
+            
+        )
+
+        self.classific_block=nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64*7*7,128),
+            nn.ReLU(),
+            nn.Linear(128,10)
+        )
+    def forward(self,x):
+        x=self.convblock(x)
+        x=self.classific_block(x)
+        return x
+
+
+
+
+      train_data=datasets.MNIST(
+    download=True,
+    train=True,
+    transform=ToTensor(),
+    root=r'C:\Users\vivek kumbhar\Desktop\DATASETSDL',
+    target_transform=None
+                
+)
+
+test_data=datasets.MNIST(
+    download=True,
+    train=False,
+    transform=ToTensor(),
+    root=r'C:\Users\vivek kumbhar\Desktop\DATASETSDL',
+    target_transform=None
+                
+)
+      
+            
+            
+        

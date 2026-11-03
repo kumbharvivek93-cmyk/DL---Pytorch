@@ -1,0 +1,12 @@
+# to make predictions on testing images we have to do following steps -> 
+
+images,labels=next(iter(test_dataloader)):
+image=images[0]
+plt.imshow(image.squeeze(dim=0)
+
+model.eval()
+witht torch.inferece_mode():
+  X=image.unsqueeze(dim=1)
+  pred=model(X)
+  ans=pred.argmax(dim=1)
+  return ans

@@ -1,0 +1,16 @@
+# first from dataloader take one batch into images,labels
+
+images,labels=next(iter(train_dataloader))
+len(images) -> 32
+
+for i in images :
+  i=i.unsqueeze(dim=0).to(device)
+  pred=model(i)
+  ans=pred.argmax(dim=1).item()
+  l.append(ans)
+
+# done predictions on a batch now compare with target labels
+
+pred=torch.tensor(l)
+from sklearn.metrics import confussisonmetrics
+cm=confussionmetrics(labels,pred)

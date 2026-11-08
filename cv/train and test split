@@ -1,0 +1,13 @@
+if in a dataset or file the train and test split is not provided then we can do it with -> random_split
+
+1. load the data as train_data
+
+from torch.utils.data import Random_split
+total_size=len(train_data)
+train_size=int(0.8 * total_size)
+test_size=total_size - train_size
+train_data,test_data=Random_split(train_data,[train_size,test_size])  # this is how we can split the data into train and test one 
+
+
+
+

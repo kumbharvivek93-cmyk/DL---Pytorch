@@ -1,0 +1,10 @@
+BatchNorm: you might have seen sometimes during trainig the process became so slow or unstable to overcomet this and increase model training 
+we use BatchNorm()
+
+how ? , batchnorm introduces tow learnable parameters in nn ( shift & scaling ) is learns during trainag 
+and it can manage activation scaling and activations 
+
+on any level and scale
+
+Dropout : nn.Dropout2d() randomly disables entire feature map to some channels to make model less dependant on few kernels or 
+maps and for linear we use nn.Dropout()

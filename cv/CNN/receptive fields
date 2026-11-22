@@ -1,0 +1,15 @@
+RECEPTIVE FIELDS IN CNN IS VERY IMPORTANT CONCEPT , AND must be required to understand some famous cnn archs such as 
+tiny vgg , alexnet , ResNet, googleNet ect , the ResNet is newest
+
+, so lets get into( RECEPTIVE FIELDS)
+
+
+THE REGION IN ORIGINAL INPUT IMAGE THAT USED OR SEEN BY A NEURON IN ACTIVATION MAP 
+
+AS CNN GROWS DEEPERS I.E MORE LAYRES THE RECEPTIVE FILEDS INCRESES 
+
+THATS WHEY WE SAY MORE DEEPER LAYERS TEND TO EXTRACT MORE DOMININT AND BIG FEATURES FROM IMAGES 
+BECAUSE THEY SEE BIG PORTION OF IMAGE 
+
+FORMULA TO CALCULATE  (((receptive fields=1+receptive fields in privious layres+kernel size*layer jump )))
+

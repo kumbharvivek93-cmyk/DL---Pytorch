@@ -1,0 +1,6 @@
+we have priviously seen that getting data into colab is a bit difficult , but to do it 
+we just can copy the code snippist on kaggle and run it in colab 
+then we got our data downloaded in cache , 
+then we have run a command 
+
+! cp -r (filepath) / contents/data  , that is ~ spidey

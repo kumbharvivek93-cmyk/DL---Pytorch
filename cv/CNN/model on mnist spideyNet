@@ -1,0 +1,79 @@
+my model is :;
+
+class spideynetmnist(nn.Module):
+  def __init__(self):
+    super().__init__()
+
+    self.convlayers=nn.Sequential(
+        nn.Conv2d(1,32,3,padding=1),
+        nn.BatchNorm2d(32),
+        nn.ReLU(),
+
+        nn.Conv2d(32,64,3,padding=1,stride=1),
+        nn.BatchNorm2d(64),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2),
+
+        nn.Conv2d(64,128,3,padding=1),
+        nn.BatchNorm2d(128),
+        nn.ReLU(),
+
+        nn.Conv2d(128,256,3,padding=1),
+        nn.BatchNorm2d(256),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2),
+
+        nn.Conv2d(256,512,2,padding=1),
+        nn.BatchNorm2d(512),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2)
+    )
+
+    self.clf=nn.Sequential(
+        nn.AdaptiveAvgPool2d((1,1)),
+        nn.Flatten(),
+        nn.Linear(512,1024),
+        nn.Dropout(p=0.2),
+        nn.ReLU(),
+        nn.Linear(1024,10)
+    )
+
+  def forward(self,x):
+    return self.clf(self.convlayers(x))
+
+
+
+
+
+Results for my model are::
+
+
+
+
+What your numbers say
+
+1. Train loss is stuck at about 0.05, which is high for MNIST.
+A decent CNN gets train loss under 0.01 on this dataset. Yours falls fast for 3 epochs, then crawls down from 0.07 to 0.048 over the next 16.
+
+2. Train and test loss are about the same, so you're not overfitting.
+Your model is held back by the optimization, not by memorizing the data. So don't add more dropout or regularization. You need to remove things that are holding the model back.
+
+3. Test loss is noisy and jumps around.
+It goes 0.053 → 0.069 → 0.062 → 0.056 → 0.078, and it ends with 0.047 → 0.103 on the last two epochs. A stable run should look like a smooth curve with small wiggles. A swing from 0.047 to 0.103 in one epoch means the model is unstable. If you had stopped one epoch earlier, you'd have thought it was doing great.
+
+Why it's happening (most likely causes)
+weight_decay=0.001 with Adam. This is a strong penalty, and it's what keeps your train loss from going below about 0.05. It also fights BatchNorm and makes training jumpy. Use AdamW(weight_decay=1e-4).
+Constant LR of 0.001 for all 20 epochs. At the start it's fine, but later the optimizer keeps bouncing around the minimum instead of settling in. A scheduler (OneCycleLR or cosine) fixes this, and it's probably why the last epoch's test loss jumped.
+shuffle=False. Batches arrive in the same order every epoch, so gradients are correlated and the BatchNorm running statistics get worse.
+No normalization, and the odd 2x2 kernels from earlier.
+What I'd do
+
+Use the cleaned-up code I gave you. It fixes all of the above, and it prints accuracy too. I'd expect:
+
+train loss going below 0.02 within about 5 epochs
+test loss smooth and around 0.02 or lower
+test accuracy around 99.5%
+
+Right now I'd guess you're at roughly 98.5–99% accuracy. Loss alone doesn't tell me exactly, which is why the new loop logs accuracy.
+
+If you run the new version, paste the output and we can compare the two. Seeing the difference between a broken and a fixed training setup is the best way to learn this.

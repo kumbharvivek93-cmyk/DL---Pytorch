@@ -1,0 +1,27 @@
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+model1.eval()
+y_pred = []
+y_actual = []
+
+with torch.inference_mode():
+    for X, y in test_loader:
+        X, y = X.to(device), y.to(device)
+        outputs = model1(X)
+        preds = outputs.argmax(dim=1)
+        
+        y_pred.extend(preds.cpu().numpy())
+        y_actual.extend(y.cpu().numpy())
+
+# Calculate confusion matrix
+cm = confusion_matrix(y_actual, y_pred)
+
+# Plot confusion matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=train_data.classes, yticklabels=train_data.classes)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
